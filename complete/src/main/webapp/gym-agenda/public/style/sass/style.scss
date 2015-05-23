@@ -1,0 +1,96 @@
+@import "public/libs/bootswatch-scss/cyborg/variables";
+@import "public/libs/bootstrap-sass-official/assets/stylesheets/bootstrap/variables";
+@import "public/libs/bootstrap-sass-official/assets/stylesheets/bootstrap";
+@import "public/libs/bootswatch-scss/cyborg/bootswatch";
+
+html, body {
+	min-height: 100%;
+	height: 100%;
+}
+
+a{
+	cursor: pointer;
+	transition: color .1s ease;
+	-moz-transition: color .1s ease;
+	-webkit-transition: color .1s ease;
+	&:hover{
+		text-decoration: none;
+	}
+}
+
+.strike {
+  text-decoration: line-through;
+}
+
+
+.box{
+	p{
+		padding-top: 50%;
+		color: white;
+	}
+
+	&:hover{
+		opacity: .8;
+		cursor: pointer;
+	}
+
+	height: 200px;
+	width: 200px;
+	margin-right: 15px;
+	margin-top: 15px;
+}
+
+.panel-heading {
+    padding: 5px 15px;
+}
+
+.panel-footer {
+	padding: 1px 15px;
+	color: #A0A0A0;
+}
+
+.profile-img {
+	width: 96px;
+	height: 96px;
+	margin: 0 auto 10px;
+	display: block;
+	-moz-border-radius: 50%;
+	-webkit-border-radius: 50%;
+	border-radius: 50%;
+}
+
+input[type=text]{
+	border: 1px solid gray;
+	background-color: #222;
+	width: 100%;
+}
+
+.form-control:focus {
+	box-shadow: inset 0 1px 1px #81B819;
+}
+
+
+#main-wrap{
+	padding-top: 0px;
+
+	.playlistTitle{
+		span{
+			color:#81B819;
+			font-size: 26px;
+		}
+	}
+
+	#currentPlaylist{
+		table{
+			thead{
+				a{
+					text-decoration: none;
+					&:hover{
+						text-decoration: none;
+						color:#81B819;
+					}
+				}
+			}
+		}
+	}
+}
