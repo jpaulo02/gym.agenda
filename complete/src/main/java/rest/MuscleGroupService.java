@@ -3,6 +3,7 @@ package rest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import beans.MuscleGroup;
 import beans.MuscleGroupList;
 import dao.MuscleGroupDao;
 
@@ -20,5 +21,15 @@ public class MuscleGroupService {
 			t.printStackTrace();
 		}
 		return list;
+	}
+
+	public MuscleGroup getExercisesByMuscleName(String muscleName) {
+		MuscleGroup group = new MuscleGroup();
+		try{ 
+			group = dao.getExercisesByMuscleName(muscleName);
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+		return group;
 	}
 }
