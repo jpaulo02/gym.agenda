@@ -5,7 +5,10 @@
 
     <groupId>org.springframework</groupId>
     <artifactId>gym.agenda</artifactId>
+    <packaging>war</packaging>
     <version>0.1.0</version>
+    <name>gym-agenda</name>
+    <url>gym-agenda.com</url>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
