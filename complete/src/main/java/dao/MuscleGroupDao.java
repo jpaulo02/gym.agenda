@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 
+import beans.ExerciseLog;
 import beans.Exercises;
 import beans.MuscleGroup;
 import beans.MuscleGroupList;
@@ -26,6 +27,11 @@ public class MuscleGroupDao {
 	
 	private static final String getAllMuscleGroups = "select * from MUSCLE_GROUPS";
 	private static final String getExercisesByMuscleName = "SELECT E.ID, E.NAME FROM MUSCLE_GROUPS MG, EXERCISES E WHERE MG.id=E.muscle_group_id AND MG.name LIKE ?";
+	private static final String insertIntoExerciseLogs = "INSERT INTO EXERCISE_LOGS (EXERCISES_ID, REPS, WEIGHT, NOTES, DATE) VALUES (?, ?, ?, ?, CURDATE());";
+	private static final String getLogByDateAndWorkoutId = "SELECT * FROM EXERCISE_LOGS WHERE DATE = CURDATE() AND EXERCISES_ID = ?";
+	
+	
+	
 	
 	public MuscleGroupList getAllMuscleGroups() {
 		MuscleGroupList list = new MuscleGroupList();
@@ -67,6 +73,40 @@ public class MuscleGroupDao {
 		
 		return group;
 	}
+	
+	public ExerciseLog logExercise(ExerciseLog log) {
+		try {
+			PreparedStatement ps = getConnection().prepareStatement(insertIntoExerciseLogs);
+			ps.setString(1, log.getWorkoutId());
+			ps.setString(2, log.getReps());
+			ps.setString(3, log.getWeight());
+			ps.setString(4, log.getNotes());
+			ps.execute();
+			
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+		return log;
+	}
+	
+	public List<ExerciseLog> getLogByDateAndWorkoutId(String workoutId) {
+		List<ExerciseLog> logs = new ArrayList<ExerciseLog>();
+		ExerciseLog log = new ExerciseLog();
+		
+		try {
+			PreparedStatement ps = getConnection().prepareStatement(getLogByDateAndWorkoutId);
+			ps.setString(1, workoutId);
+			ResultSet rs = ps.executeQuery();
+			
+			while(rs.next()){
+				log = resultSetToExerciseLog(rs);
+				logs.add(log);
+			}
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+		return logs;
+	}
 
 	private MuscleGroup resultSetToMuscleGroup(ResultSet rs) throws SQLException {
 		MuscleGroup muscleGroup = new MuscleGroup();
@@ -82,6 +122,15 @@ public class MuscleGroupDao {
 		return exercise;
 	}
 	
+	private ExerciseLog resultSetToExerciseLog(ResultSet rs) throws SQLException {
+		ExerciseLog log = new ExerciseLog();
+		log.setWorkoutId(rs.getString("EXERCISES_ID"));
+		log.setReps(rs.getString("REPS"));
+		log.setWeight(rs.getString("WEIGHT"));
+		log.setNotes(rs.getString("NOTES"));
+		return log;
+	}
+	
 	public static Connection getConnection() throws URISyntaxException, SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 		Class.forName("com.mysql.jdbc.Driver");
 	    
@@ -94,5 +143,4 @@ public class MuscleGroupDao {
 
 	    return connection;
 	}
-
 }

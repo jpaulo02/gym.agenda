@@ -4,12 +4,21 @@ import java.util.Date;
 
 public class ExerciseLog {
 	
+	private String workoutId;
 	private Date date;
 	private String reps;
 	private String weight;
 	private String notes;
 	
 	
+	public String getWorkoutId() {
+		return workoutId;
+	}
+
+	public void setWorkoutId(String workoutId) {
+		this.workoutId = workoutId;
+	}
+
 	public Date getDate() {
 		return date;
 	}
