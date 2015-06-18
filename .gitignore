@@ -1,0 +1,6 @@
+node_modules/*
+.sass-cache/*
+complete/.settings/*
+complete/.settings/org.eclipse.core.resources.prefs
+complete/.settings/org.eclipse.wst.jsdt.ui.superType.name
+complete/target/*
