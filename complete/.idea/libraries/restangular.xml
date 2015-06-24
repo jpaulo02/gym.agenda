@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="restangular">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/src/main/webapp/gym-agenda/public/libs/restangular/dist/restangular.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

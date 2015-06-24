@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import rest.ExerciseLogService;
 import beans.ExerciseLog;
 import beans.Exercises;
 
@@ -29,6 +30,20 @@ public class ExerciseLogController {
 		List<ExerciseLog> logs = new ArrayList<ExerciseLog>();
 		try{
 			exerciseLogService.logExercise(log);
+			logs = exerciseLogService.getLogByDateAndWorkoutId(log.getWorkoutId());
+			exercises.setLogs(logs);
+		}catch(Throwable t){
+			throw new Throwable("Error calling getExercisesById with id ", t);
+		}
+		return exercises;
+	}
+	
+	@RequestMapping(value = "/updateLog", method = RequestMethod.POST , produces={"application/xml", "application/json"})
+	public @ResponseBody Exercises updateLog(@RequestBody ExerciseLog log) throws Throwable{
+		Exercises exercises = new Exercises();
+		List<ExerciseLog> logs = new ArrayList<ExerciseLog>();
+		try{
+			exerciseLogService.updateLog(log);
 			logs = exerciseLogService.getLogByDateAndWorkoutId(log.getWorkoutId());
 			exercises.setLogs(logs);
 		}catch(Throwable t){

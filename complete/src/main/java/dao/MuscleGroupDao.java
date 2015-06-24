@@ -27,9 +27,10 @@ public class MuscleGroupDao {
 	
 	private static final String getAllMuscleGroups = "select * from MUSCLE_GROUPS";
 	private static final String getExercisesByMuscleName = "SELECT E.ID, E.NAME FROM MUSCLE_GROUPS MG, EXERCISES E WHERE MG.id=E.muscle_group_id AND MG.name LIKE ?";
-	private static final String insertIntoExerciseLogs = "INSERT INTO EXERCISE_LOGS (EXERCISES_ID, REPS, WEIGHT, NOTES, DATE) VALUES (?, ?, ?, ?, CURDATE());";
-	private static final String getLogByDateAndWorkoutId = "SELECT * FROM EXERCISE_LOGS WHERE DATE = CURDATE() AND EXERCISES_ID = ?";
-	
+	private static final String insertIntoExerciseLogs = "INSERT INTO EXERCISE_LOGS (EXERCISES_ID, REPS, WEIGHT, NOTES, DATE) VALUES (?, ?, ?, ?, NOW());";
+	private static final String updateExerciseLogs = "UPDATE EXERCISE_LOGS SET REPS = ?, WEIGHT = ?, NOTES = ? WHERE id = ?";
+	private static final String getLogByDateAndWorkoutId = "SELECT * FROM EXERCISE_LOGS WHERE DATE(DATE) = CURDATE() AND EXERCISES_ID = ?";
+	private static final String getExerciseLogsByIdDate = "SELECT * FROM EXERCISE_LOGS WHERE exercises_id = ? AND DATE(DATE) = CURDATE()";
 	
 	
 	
@@ -64,6 +65,7 @@ public class MuscleGroupDao {
 			
 			while(rs.next()){
 				exercise = resultSetToExercise(rs);
+				exercise.setLogs(this.getExerciseLogsByIdDate(exercise.getId()));
 				exerciseList.add(exercise);
 			}
 			group.setExerciseList(exerciseList);
@@ -74,6 +76,26 @@ public class MuscleGroupDao {
 		return group;
 	}
 	
+	private List<ExerciseLog> getExerciseLogsByIdDate(String exerciseId) {
+		// TODO Auto-generated method stub
+		List<ExerciseLog> logs = new ArrayList<ExerciseLog>();
+		ExerciseLog log = new ExerciseLog();
+		try{
+			PreparedStatement ps = getConnection().prepareStatement(getExerciseLogsByIdDate);
+			ps.setString(1, exerciseId);
+			ResultSet rs = ps.executeQuery();
+			
+			while(rs.next()){
+				log = resultSetToExerciseLog(rs);
+				logs.add(log);
+			}
+			
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+		return logs;
+	}
+
 	public ExerciseLog logExercise(ExerciseLog log) {
 		try {
 			PreparedStatement ps = getConnection().prepareStatement(insertIntoExerciseLogs);
@@ -82,6 +104,25 @@ public class MuscleGroupDao {
 			ps.setString(3, log.getWeight());
 			ps.setString(4, log.getNotes());
 			ps.execute();
+			
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+		return log;
+	}
+	
+	public ExerciseLog updateExercise(ExerciseLog log) {
+		try {		
+			System.out.println("reps " + log.getReps());
+			System.out.println("weight " + log.getWeight());
+			System.out.println("notes " + log.getNotes());
+			System.out.println("id " + log.getId());
+			PreparedStatement ps = getConnection().prepareStatement(updateExerciseLogs);
+			ps.setString(1, log.getReps());
+			ps.setString(2, log.getWeight());
+			ps.setString(3, log.getNotes());
+			ps.setString(4, log.getId());
+			ps.executeUpdate();
 			
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -124,6 +165,7 @@ public class MuscleGroupDao {
 	
 	private ExerciseLog resultSetToExerciseLog(ResultSet rs) throws SQLException {
 		ExerciseLog log = new ExerciseLog();
+		log.setId(rs.getString("id"));
 		log.setWorkoutId(rs.getString("EXERCISES_ID"));
 		log.setReps(rs.getString("REPS"));
 		log.setWeight(rs.getString("WEIGHT"));

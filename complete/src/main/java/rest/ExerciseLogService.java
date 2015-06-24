@@ -33,4 +33,12 @@ public class ExerciseLogService {
 		return logs;
 	}
 
+	public void updateLog(ExerciseLog log) {
+		try{
+			log = dao.updateExercise(log);
+		} catch (Throwable t){
+			t.printStackTrace();
+		}
+	}
+
 }

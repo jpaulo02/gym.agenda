@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class ExerciseLog {
 	
+	private String id;
 	private String workoutId;
 	private Date date;
 	private String reps;
@@ -11,6 +12,14 @@ public class ExerciseLog {
 	private String notes;
 	
 	
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
 	public String getWorkoutId() {
 		return workoutId;
 	}
