@@ -2,12 +2,15 @@ package dao;
 
 import java.net.URISyntaxException;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
@@ -18,6 +21,7 @@ import beans.ExerciseLog;
 import beans.Exercises;
 import beans.MuscleGroup;
 import beans.MuscleGroupList;
+import beans.WorkoutStats;
 
 @Repository
 public class MuscleGroupDao {
@@ -29,10 +33,11 @@ public class MuscleGroupDao {
 	private static final String getExercisesByMuscleName = "SELECT E.ID, E.NAME FROM MUSCLE_GROUPS MG, EXERCISES E WHERE MG.id=E.muscle_group_id AND MG.name LIKE ?";
 	private static final String insertIntoExerciseLogs = "INSERT INTO EXERCISE_LOGS (EXERCISES_ID, REPS, WEIGHT, NOTES, DATE) VALUES (?, ?, ?, ?, NOW());";
 	private static final String updateExerciseLogs = "UPDATE EXERCISE_LOGS SET REPS = ?, WEIGHT = ?, NOTES = ? WHERE id = ?";
-	private static final String getLogByDateAndWorkoutId = "SELECT * FROM EXERCISE_LOGS WHERE DATE(DATE) = CURDATE() AND EXERCISES_ID = ?";
+	private static final String getLogByDateAndWorkoutId = "SELECT * FROM EXERCISE_LOGS WHERE DATE(DATE) = ? AND EXERCISES_ID = ?";
 	private static final String getExerciseLogsByIdDate = "SELECT * FROM EXERCISE_LOGS WHERE exercises_id = ? AND DATE(DATE) = CURDATE()";
-	
-	
+	private static final String getPreviousExerciseLogs = "SELECT DISTINCT(DATE(DATE)) AS DATE FROM EXERCISE_LOGS WHERE exercises_id = ? AND DATE(DATE) != CURDATE() ORDER BY DATE DESC";	
+	private static final String getWorkoutStartTime = "SELECT DATE FROM EXERCISE_LOGS WHERE DATE(DATE) = CURDATE() ORDER BY DATE ASC LIMIT 1";
+	private static final String getDailyStats = "SELECT * FROM (SELECT DATE(DATE) AS DATE1, MIN(DATE) AS START_TIME, MAX(DATE) AS END_TIME, SUM(REPS) AS TOTAL_REPS, TIMEDIFF(MAX(DATE), MIN(DATE)) AS DURATION, SUM(WEIGHT) AS TOTAL_WEIGHT FROM EXERCISE_LOGS WHERE DATE(DATE) = CURDATE()) A, (SELECT DATE, SUM(SETS) AS NUM_SETS FROM (SELECT DATE(DATE) AS DATE, COUNT(EXERCISES_ID) AS SETS FROM EXERCISE_LOGS WHERE DATE(DATE) = CURDATE() GROUP BY DATE(DATE), EXERCISES_ID) AS TEST) B";
 	
 	public MuscleGroupList getAllMuscleGroups() {
 		MuscleGroupList list = new MuscleGroupList();
@@ -54,7 +59,7 @@ public class MuscleGroupDao {
 		return list;
 	}
 	
-	public MuscleGroup getExercisesByMuscleName(String muscleName) throws MySQLSyntaxErrorException{
+	public MuscleGroup getExercisesByMuscleName(String muscleName) {
 		MuscleGroup group = new MuscleGroup();
 		List<Exercises> exerciseList = new ArrayList<Exercises>();
 		Exercises exercise = new Exercises();
@@ -76,8 +81,42 @@ public class MuscleGroupDao {
 		return group;
 	}
 	
+	public WorkoutStats getDailyStatistics() {
+		WorkoutStats stats = new WorkoutStats();
+		try{
+			PreparedStatement ps = getConnection().prepareStatement(getDailyStats);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()){
+				stats.setStartTime(rs.getTimestamp("START_TIME").toString());
+				stats.setEndTime(rs.getTimestamp("END_TIME").toString());
+				stats.setTotalReps(rs.getString("TOTAL_REPS"));
+				stats.setWorkoutDuration(rs.getTimestamp("DURATION").toString().substring(10, 19));
+				stats.setNumSets(rs.getString("NUM_SETS"));
+				stats.setTotalWeight(rs.getString("TOTAL_WEIGHT"));
+				stats.setAvgRestTime(stats.getNumSets(), stats.getWorkoutDuration());
+			}
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+		
+		return stats;
+	}
+	
+	public String getFirstLogTime() {
+		Timestamp startTime = null;
+		try{
+			PreparedStatement ps = getConnection().prepareStatement(getWorkoutStartTime);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()){
+				startTime = rs.getTimestamp("DATE");
+			}
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+		return startTime.toString();
+	}
+	
 	private List<ExerciseLog> getExerciseLogsByIdDate(String exerciseId) {
-		// TODO Auto-generated method stub
 		List<ExerciseLog> logs = new ArrayList<ExerciseLog>();
 		ExerciseLog log = new ExerciseLog();
 		try{
@@ -113,10 +152,6 @@ public class MuscleGroupDao {
 	
 	public ExerciseLog updateExercise(ExerciseLog log) {
 		try {		
-			System.out.println("reps " + log.getReps());
-			System.out.println("weight " + log.getWeight());
-			System.out.println("notes " + log.getNotes());
-			System.out.println("id " + log.getId());
 			PreparedStatement ps = getConnection().prepareStatement(updateExerciseLogs);
 			ps.setString(1, log.getReps());
 			ps.setString(2, log.getWeight());
@@ -130,13 +165,18 @@ public class MuscleGroupDao {
 		return log;
 	}
 	
-	public List<ExerciseLog> getLogByDateAndWorkoutId(String workoutId) {
+	public List<ExerciseLog> getLogByDateAndWorkoutId(String workoutId, String date) {
 		List<ExerciseLog> logs = new ArrayList<ExerciseLog>();
 		ExerciseLog log = new ExerciseLog();
-		
 		try {
 			PreparedStatement ps = getConnection().prepareStatement(getLogByDateAndWorkoutId);
-			ps.setString(1, workoutId);
+			if(date == null || date.equalsIgnoreCase("null")){
+				Date timeNow = new Date(Calendar.getInstance().getTimeInMillis());
+				ps.setDate(1, timeNow);
+			}else{
+				ps.setString(1, date);
+			}
+			ps.setString(2, workoutId);
 			ResultSet rs = ps.executeQuery();
 			
 			while(rs.next()){
@@ -148,28 +188,69 @@ public class MuscleGroupDao {
 		}
 		return logs;
 	}
+	
+	public List<String> getLogDatesByExercisesId(String exercisesId) {
+		List<String> dates = new ArrayList<String>();
+		String date = null;
+		try {
+			PreparedStatement ps = getConnection().prepareStatement(getPreviousExerciseLogs);
+			ps.setString(1, exercisesId);
+			ResultSet rs = ps.executeQuery();
+			
+			while(rs.next()){
+				date = resultSetToDateList(rs);
+				dates.add(date);
+			}
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+		
+		return dates;
+	}
 
-	private MuscleGroup resultSetToMuscleGroup(ResultSet rs) throws SQLException {
+	private String resultSetToDateList(ResultSet rs) {
+		String date = null;
+		try {
+			date = (rs.getDate("DATE")).toString();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return date;
+	}
+
+	private MuscleGroup resultSetToMuscleGroup(ResultSet rs) {
 		MuscleGroup muscleGroup = new MuscleGroup();
-		muscleGroup.setName(rs.getString("name"));
-		muscleGroup.setId(rs.getInt("id"));
+		try {
+			muscleGroup.setName(rs.getString("name"));
+			muscleGroup.setId(rs.getInt("id"));
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return muscleGroup;
 	}
 	
-	private Exercises resultSetToExercise(ResultSet rs) throws SQLException {
+	private Exercises resultSetToExercise(ResultSet rs) {
 		Exercises exercise = new Exercises();
-		exercise.setId(rs.getString("ID"));
-		exercise.setName(rs.getString("NAME"));
+		try {
+			exercise.setId(rs.getString("ID"));
+			exercise.setName(rs.getString("NAME"));
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return exercise;
 	}
 	
-	private ExerciseLog resultSetToExerciseLog(ResultSet rs) throws SQLException {
+	private ExerciseLog resultSetToExerciseLog(ResultSet rs) {
 		ExerciseLog log = new ExerciseLog();
-		log.setId(rs.getString("id"));
-		log.setWorkoutId(rs.getString("EXERCISES_ID"));
-		log.setReps(rs.getString("REPS"));
-		log.setWeight(rs.getString("WEIGHT"));
-		log.setNotes(rs.getString("NOTES"));
+		try {
+			log.setId(rs.getString("id"));
+			log.setWorkoutId(rs.getString("EXERCISES_ID"));
+			log.setReps(rs.getString("REPS"));
+			log.setWeight(rs.getString("WEIGHT"));
+			log.setNotes(rs.getString("NOTES"));
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return log;
 	}
 	
@@ -185,4 +266,5 @@ public class MuscleGroupDao {
 
 	    return connection;
 	}
+
 }

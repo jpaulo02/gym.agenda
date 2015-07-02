@@ -5,11 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import beans.ExerciseLog;
 import beans.MuscleGroup;
 import beans.MuscleGroupList;
+import beans.WorkoutStats;
 
 @RestController
 @RequestMapping("/gym-agenda/muscleGroup")
@@ -24,9 +25,20 @@ public class MuscleGroupController {
 		try{
 			list = muscleService.getALlMuscleGroups();
 		}catch(Throwable t){
-			throw new Throwable("Error calling getExercisesById with id ", t);
+			throw new Throwable("Error calling allMuscles", t);
 		}
 		return list;
+	}
+	
+	@RequestMapping(value = "/getDailyStatistics", method = RequestMethod.GET)
+	public WorkoutStats getDailyStatistics() throws Throwable{
+		WorkoutStats dailyStats = new WorkoutStats();
+		try{
+			dailyStats = muscleService.getDailyStatistics();
+		}catch(Throwable t){
+			throw new Throwable("Error calling getFirstLogTime", t);
+		}
+		return dailyStats;
 	}
 	
 	@RequestMapping(value = "/getExercisesByMuscleName/{muscleName}", method = RequestMethod.GET)
@@ -35,7 +47,7 @@ public class MuscleGroupController {
 		try{
 			group = muscleService.getExercisesByMuscleName(muscleName);
 		}catch(Throwable t){
-			throw new Throwable("Error calling getExercisesByMuscleId with id ", t);
+			throw new Throwable("Error calling getExercisesByMuscleName with name " + muscleName, t);
 		}
 		return group;
 	}

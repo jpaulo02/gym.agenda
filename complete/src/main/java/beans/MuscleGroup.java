@@ -12,13 +12,7 @@ public class MuscleGroup {
 	private int id;
 	private String name;
 	private List<Exercises> exerciseList;
-	
-	
-	
-	//for testing
-	public void printHello() {
-		System.out.println("Hello " + name);
-	}
+	private WorkoutStats stats;
 	
 	
 	public int getId() {
@@ -41,6 +35,14 @@ public class MuscleGroup {
 	}
 	public void setExerciseList(List<Exercises> exerciseList) {
 		this.exerciseList = exerciseList;
+	}
+
+	public WorkoutStats getStats() {
+		return stats;
+	}
+
+	public void setStats(WorkoutStats stats) {
+		this.stats = stats;
 	}
 	
 }

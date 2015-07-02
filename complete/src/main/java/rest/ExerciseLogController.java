@@ -30,10 +30,10 @@ public class ExerciseLogController {
 		List<ExerciseLog> logs = new ArrayList<ExerciseLog>();
 		try{
 			exerciseLogService.logExercise(log);
-			logs = exerciseLogService.getLogByDateAndWorkoutId(log.getWorkoutId());
+			logs = exerciseLogService.getLogByDateAndWorkoutId(log.getWorkoutId(), null);
 			exercises.setLogs(logs);
 		}catch(Throwable t){
-			throw new Throwable("Error calling getExercisesById with id ", t);
+			throw new Throwable("Error calling logExercise", t);
 		}
 		return exercises;
 	}
@@ -44,25 +44,36 @@ public class ExerciseLogController {
 		List<ExerciseLog> logs = new ArrayList<ExerciseLog>();
 		try{
 			exerciseLogService.updateLog(log);
-			logs = exerciseLogService.getLogByDateAndWorkoutId(log.getWorkoutId());
+			logs = exerciseLogService.getLogByDateAndWorkoutId(log.getWorkoutId(), null);
 			exercises.setLogs(logs);
 		}catch(Throwable t){
-			throw new Throwable("Error calling getExercisesById with id ", t);
+			throw new Throwable("Error calling updateLog", t);
 		}
 		return exercises;
 	}
 	
-	@RequestMapping(value = "/getLogByDateAndWorkoutId/{workoutId}", method = RequestMethod.GET , produces={"application/xml", "application/json"})
-	public @ResponseBody Exercises getLogByDateAndWorkoutId(@PathVariable(value="workoutId") String workoutId) throws Throwable{
+	@RequestMapping(value = "/getLogByDateAndWorkoutId/workoutId/{workoutId}/date/{date}", method = RequestMethod.GET , produces={"application/xml", "application/json"})
+	public @ResponseBody Exercises getLogByDateAndWorkoutId(@PathVariable(value="workoutId") String workoutId, @PathVariable(value="date") String date) throws Throwable{
 		Exercises exercises = new Exercises();
 		List<ExerciseLog> logs = new ArrayList<ExerciseLog>();
 		try{
-			logs = exerciseLogService.getLogByDateAndWorkoutId(workoutId);
+			logs = exerciseLogService.getLogByDateAndWorkoutId(workoutId, date);
 			exercises.setLogs(logs);
+		}catch(Throwable t){
+			throw new Throwable("Error calling getLogByDateAndWorkoutId with id " + workoutId, t);
+		}
+		return exercises;
+	}
+	
+	@RequestMapping(value = "/getLogDates/{workoutId}", method = RequestMethod.GET , produces={"application/xml", "application/json"})
+	public @ResponseBody List<String> getLogDates(@PathVariable(value="workoutId") String workoutId) throws Throwable{
+		List<String> dates = new ArrayList<String>();
+		try{
+			dates = exerciseLogService.getLogDates(workoutId);
 		}catch(Throwable t){
 			throw new Throwable("Error calling getExercisesById with id ", t);
 		}
-		return exercises;
+		return dates;
 	}
 
 }

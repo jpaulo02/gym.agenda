@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import beans.MuscleGroup;
 import beans.MuscleGroupList;
+import beans.WorkoutStats;
 import dao.MuscleGroupDao;
 
 @Service
@@ -31,5 +32,15 @@ public class MuscleGroupService {
 			t.printStackTrace();
 		}
 		return group;
+	}
+
+	public WorkoutStats getDailyStatistics() {
+		WorkoutStats stats = new WorkoutStats();
+		try{ 
+			stats = dao.getDailyStatistics();
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+		return stats;
 	}
 }

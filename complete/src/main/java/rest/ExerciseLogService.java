@@ -23,10 +23,10 @@ public class ExerciseLogService {
 		}
 	}
 
-	public List<ExerciseLog> getLogByDateAndWorkoutId(String workoutId) {
+	public List<ExerciseLog> getLogByDateAndWorkoutId(String workoutId, String date) {
 		List<ExerciseLog> logs = new ArrayList<ExerciseLog>();
 		try{
-			logs = dao.getLogByDateAndWorkoutId(workoutId);
+			logs = dao.getLogByDateAndWorkoutId(workoutId, date);
 		} catch (Throwable t){
 			t.printStackTrace();
 		}
@@ -39,6 +39,16 @@ public class ExerciseLogService {
 		} catch (Throwable t){
 			t.printStackTrace();
 		}
+	}
+
+	public List<String> getLogDates(String exercisesId) {
+		List<String> dates = new ArrayList<String>();
+		try{
+			dates = dao.getLogDatesByExercisesId(exercisesId);
+		} catch (Throwable t){
+			t.printStackTrace();
+		}
+		return dates;
 	}
 
 }
