@@ -71,9 +71,19 @@ public class ExerciseLogController {
 		try{
 			dates = exerciseLogService.getLogDates(workoutId);
 		}catch(Throwable t){
-			throw new Throwable("Error calling getExercisesById with id ", t);
+			throw new Throwable("Error calling getExercisesById with id " + workoutId, t);
 		}
 		return dates;
 	}
-
+	
+	@RequestMapping(value = "/getGraphData/{exerciseId}", method = RequestMethod.GET , produces={"application/xml", "application/json"})
+	public @ResponseBody Exercises getTotalWeightByExerciseId(@PathVariable(value="exerciseId") String exerciseId) throws Throwable{
+		Exercises exercises = new Exercises();
+		try{
+			exercises = exerciseLogService.getTotalWeightByExerciseId(exerciseId);
+		}catch(Throwable t){
+			throw new Throwable("Error calling getTotalWeightByExerciseId with id " + exerciseId, t);
+		}
+		return exercises;
+	}
 }

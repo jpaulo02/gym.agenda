@@ -10,7 +10,7 @@ public class DaoUtil {
 	public static Connection getConnection() throws URISyntaxException, SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 		Class.forName("com.mysql.jdbc.Driver");
 	    
-	    String serverName = "localhost";
+	    String serverName = "localhost:3306";
 	    String mydatabase = "gymAgenda";
 	    String url = "jdbc:mysql://" + serverName + "/" + mydatabase; 
 

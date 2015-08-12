@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import dao.MuscleGroupDao;
 import beans.ExerciseLog;
+import beans.Exercises;
 
 @Service
 public class ExerciseLogService {
@@ -49,6 +50,17 @@ public class ExerciseLogService {
 			t.printStackTrace();
 		}
 		return dates;
+	}
+	
+	public Exercises getTotalWeightByExerciseId(String exercisesId){
+		Exercises e = new Exercises();
+		try{
+			e.setLogs(dao.getTotalWeightByExerciseId(exercisesId));
+		} catch (Throwable t){
+			t.printStackTrace();
+		}
+		
+		return e;
 	}
 
 }
