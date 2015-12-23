@@ -15,8 +15,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
-import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
-
 import beans.ExerciseLog;
 import beans.Exercises;
 import beans.MuscleGroup;
@@ -31,7 +29,7 @@ public class MuscleGroupDao {
 	
 	private static final String getAllMuscleGroups = "select * from MUSCLE_GROUPS";
 	private static final String getExercisesByMuscleName = "SELECT E.ID, E.NAME FROM MUSCLE_GROUPS MG, EXERCISES E WHERE MG.id=E.muscle_group_id AND MG.name LIKE ?";
-	private static final String insertIntoExerciseLogs = "INSERT INTO EXERCISE_LOGS (EXERCISES_ID, REPS, WEIGHT, NOTES, DATE) VALUES (?, ?, ?, ?, NOW());";
+	private static final String insertIntoExerciseLogs = "INSERT INTO EXERCISE_LOGS (EXERCISES_ID, USER_ID, REPS, WEIGHT, NOTES, DATE) VALUES (?, 1, ?, ?, ?, NOW());";
 	private static final String updateExerciseLogs = "UPDATE EXERCISE_LOGS SET REPS = ?, WEIGHT = ?, NOTES = ? WHERE id = ?";
 	private static final String getLogByDateAndWorkoutId = "SELECT * FROM EXERCISE_LOGS WHERE DATE(DATE) = ? AND EXERCISES_ID = ?";
 	private static final String getExerciseLogsByIdDate = "SELECT * FROM EXERCISE_LOGS WHERE exercises_id = ? AND DATE(DATE) = CURDATE()";
